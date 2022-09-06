@@ -1,0 +1,137 @@
+ <DataType xmlns="http://www.gip.com/xyna/xdev/xfractmod"
+ Version="1.8"
+ TypeName="{{classname}}"
+ TypePath="{{#invokerPackage}}{{invokerPackage}}{{/invokerPackage}}{{#modelPackage}}.{{modelPackage}}{{/modelPackage}}{{#moduleName}}.{{moduleName}}{{/moduleName}}"
+ Label="{{name}}"
+ IsAbstract="false"
+ {{#vendorExtensions.x-isSwaggerBaseType}}BaseTypeName="SwaggerBaseType" BaseTypePath="xfmg.swagger.base"{{/vendorExtensions.x-isSwaggerBaseType}}{{^vendorExtensions.x-isSwaggerBaseType}}
+ {{#dataType}}BaseTypeName="{{dataType}}" BaseTypePath="{{#invokerPackage}}{{invokerPackage}}{{/invokerPackage}}{{#modelPackage}}.{{modelPackage}}.{{/modelPackage}}{{#moduleName}}.{{moduleName}}{{/moduleName}}"{{/dataType}}
+ {{/vendorExtensions.x-isSwaggerBaseType}}>
+  <Meta>
+    <IsServiceGroupOnly>false</IsServiceGroupOnly>
+    {{#description}}<Documentation>{{description}}</Documentation>{{/description}}
+  </Meta>
+{{#vars}}
+  <Data
+   Label="{{baseName}}" VariableName="{{name}}" {{#isListContainer}}IsList="true"{{/isListContainer}}
+   {{^isPrimitiveType}}ReferenceName="{{complexType}}" ReferencePath="{{#invokerPackage}}{{invokerPackage}}{{/invokerPackage}}{{#modelPackage}}.{{modelPackage}}{{/modelPackage}}{{#moduleName}}.{{moduleName}}{{/moduleName}}"{{/isPrimitiveType}}
+   >
+    <Meta>
+      {{#isPrimitiveType}}<Type>{{^isFloat}}{{datatype}}{{/isFloat}}{{#isFloat}}Double{{/isFloat}}</Type>{{/isPrimitiveType}}
+      {{#description}}<Documentation>{{description}}{{#isFloat}} Float but handled as Double{{/isFloat}}</Documentation>{{/description}}
+    </Meta>
+  </Data>
+{{/vars}}
+  <Service Label="{{classname}}" TypeName="{{classname}}">
+    <Operation Label="is nullable" Name="isNullable" IsStatic="false">
+      <Input/>
+      <Output>
+        <Data Label="is nullable" VariableName="is_nullable">
+          <Meta>
+            <Type>boolean</Type>
+          </Meta>
+        </Data>
+      </Output>
+      <SourceCode>
+        <CodeSnippet Type="Java">return true;</CodeSnippet>
+     </SourceCode>
+    </Operation>
+    <Operation Label="is null" Name="isNull" IsStatic="false">
+      <Input/>
+      <Output>
+        <Data Label="is null" VariableName="is_null">
+          <Meta>
+            <Type>boolean</Type>
+          </Meta>
+        </Data>
+      </Output>
+      <SourceCode>
+        <CodeSnippet Type="Java">return false;</CodeSnippet>
+     </SourceCode>
+    </Operation>
+    <Operation Label="is requiered" Name="isRequiered" IsStatic="false">
+      <Input/>
+      <Output>
+        <Data Label="is requiered" VariableName="is_requiered">
+          <Meta>
+            <Type>boolean</Type>
+          </Meta>
+        </Data>
+      </Output>
+      <SourceCode>
+        <CodeSnippet Type="Java">return false;</CodeSnippet>
+     </SourceCode>
+    </Operation>
+    <Operation Label="validate" Name="validate" IsStatic="false">
+      <Input>
+      </Input>
+      <Output>
+        <Data ID="75" Label="Validation Result" VariableName="validationResult" ReferenceName="ValidationResult" ReferencePath="xfmg.swagger.base"/>
+      </Output>
+      <SourceCode>
+        <CodeSnippet Type="Java">
+        var results = new ArrayList<ValidationResult>
+        
+        boolean valid = isNullable() || (isRequiered() &amp;&amp; !isNull());
+        if (!valid) results.add(new ValidationResult(valid, this.getClass().getName() + " not nullable or requiered but null."));
+        {{#vars}}
+
+        // validate {{classname}}.{{name}} of type {{datatype}} with baseType {{baseType}}
+          {{#isPrimitiveType}}
+        try {
+          var primObj_{{-index}} = (
+            {{#isNumeric}}{{#isInteger}}new SwaggerNumberType<Integer>("{{classname}}.{{name}}", (Integer)get("{{name}}")){{/isInteger}}
+            {{#isLong}}new SwaggerNumberType<Long>("{{classname}}.{{name}}", (Long)get("{{name}}")){{/isLong}}
+            {{#isDouble}}new SwaggerNumberType<Double>("{{classname}}.{{name}}", (Double)get("{{name}}")){{/isDouble}}
+            {{#isNumber}}new SwaggerNumberType<Double>("{{classname}}.{{name}}", (Double)get("{{name}}")){{/isNumber}}
+            {{#isFloat}}new SwaggerNumberType<Float>("{{classname}}.{{name}}", ((Double)get("{{name}}")).floatValue()){{/isFloat}}{{/isNumeric}}{{^isNumeric}}
+            {{#isString}}new SwaggerStringType("{{classname}}.{{name}}", (String)get("{{name}}")){{/isString}}
+            {{#isDateTime}}new SwaggerDateTimeType("{{classname}}.{{name}}", (String)get("{{name}}")){{/isDateTime}}
+            {{#isDate}}new SwaggerDateType("{{classname}}.{{name}}", (String)get("{{name}}")){{/isDate}}{{/isNumeric}}
+            )
+            {{#isNumeric}}{{#exclusiveMinimum}}.setExcludeMin(){{/exclusiveMinimum}}{{#exclusiveMaximum}}.setExcludeMax(){{/exclusiveMaximum}}{{/isNumeric}}{{^isNumeric}}
+            {{#isString}}{{#dataFormat}}.setFormat("{{dataFormat}}"){{/dataFormat}}{{/isString}}
+            {{#requiered}}.setRequiered(){{/requiered}}{{^requiered}}.setNullable(){{/requiered}}
+              ;
+          if (!primObj_{{-index}}.isValid()) results.add(new ValidationResult(false, primObj_{{-index}}.toString());
+        }
+        catch (Excpeption e) {
+          results.add(new ValidationResult(false, "error validating {{classname}}.{{name}}" + e.toString());
+        }
+          {{/isPrimitiveType}}{{^isPrimitiveType}}
+        try {
+          var cplxObj_{{-index}} = (({{complexType}})this.get("{{name}}"));
+          if (cplxObj_{{-index}} != null) {
+            var cplxValidationResult_{{-index}} = cplxObj_{{-index}}.validate();
+            if (!cplxValidationResult_{{-index}}.getIsValid()) results.add(cplxValidationResult_{{-index}});
+          } else if ({{#requiered}}true{{/requiered}}{{^requiered}}false{{/requiered}} &amp;&amp; true) {
+            results.add(new ValidationResult(false, "{{classname}}.{{name}} of type {{complexType}} is null but requiered");
+          }
+        }
+        catch (Excpeption e) {
+          results.add(new ValidationResult(false, "error validating {{classname}}.{{name}} of type {{complexType}}" + e.toString());
+        }
+          {{/isPrimitiveType}}
+        {{/vars}}
+
+         if (results.size() &lt;= 0) return new ValidationResult(true, "OK");
+
+         StringBuffer sb = new StringBuffer();
+         results.forEach((r) -&gt; sb.append(r.getValidationResult()).append("\n"));
+
+         return new ValidationResult(false, sb.toString());
+        </CodeSnippet>
+      </SourceCode>
+    </Operation>
+    <Operation Label="set defaults" Name="setDefaults" IsStatic="false" IsAbstract="true">
+      <Input>
+      </Input>
+      <Output>
+        <Data Label="Swagger Base Type" VariableName="swaggerBaseType" ReferenceName="SwaggerBaseType" ReferencePath="xfmg.swagger.base"/>
+      </Output>
+      <SourceCode>
+        <CodeSnippet Type="Java">return this;</CodeSnippet>
+     </SourceCode>
+    </Operation>
+  </Service>
+</DataType>
