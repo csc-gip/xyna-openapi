@@ -1,0 +1,43 @@
+<DataType xmlns="http://www.gip.com/xyna/xdev/xfractmod"
+ Version="1.8"
+ TypeName="{{classname}}"
+ TypePath="{{#invokerPackage}}{{invokerPackage}}{{/invokerPackage}}{{#modelPackage}}.{{modelPackage}}{{/modelPackage}}{{#moduleName}}.{{moduleName}}{{/moduleName}}"
+ Label="{{classname}}"
+ IsAbstract="false"
+ >
+  <Meta>
+    <IsServiceGroupOnly>false</IsServiceGroupOnly>
+    {{#description}}<Documentation>{{description}}
+    values: {{#allowableValues}}{{#enumVars}}{{name}}: {{value}}{{^@last}}, {{/@last}}{{/enumVars}}{{/allowableValues}}</Documentation>{{/description}}
+  </Meta>
+  <Data Label="value" VariableName="value">
+    <Meta>
+      <Type>String</Type>
+      <Documentation>values: {{#allowableValues}}{{#enumVars}}{{value}}{{^@last}}, {{/@last}}{{/enumVars}}{{/allowableValues}}</Documentation>
+    </Meta>
+  </Data>
+  {{#allowableValues}}<Service Label="{{classname}}" TypeName="{{classname}}">{{#enumVars}}
+    <Operation Label="get {{name}}" Name="get{{name}}" IsStatic="false">
+      <Input/>
+      <Output>
+        <Data ID="11" Label="{{classname}}" VariableName="varName" ReferenceName="{{classname}}" ReferencePath="{{#invokerPackage}}{{invokerPackage}}{{/invokerPackage}}{{#modelPackage}}.{{modelPackage}}{{/modelPackage}}{{#moduleName}}.{{moduleName}}{{/moduleName}}"/>
+      </Output>
+      <SourceCode>
+        <CodeSnippet Type="Java">return new {{classname}}({{value}});</CodeSnippet>
+     </SourceCode>
+    </Operation>
+    <Operation Label="is {{name}}" Name="is{{name}}" IsStatic="false">
+      <Input/>
+      <Output>
+        <Data Label="{{name}}" VariableName="is{{name}}">
+          <Meta>
+            <Type>boolean</Type>
+          </Meta>
+        </Data>
+      </Output>
+      <SourceCode>
+        <CodeSnippet Type="Java">return {{value}}.equals(this.getValue());</CodeSnippet>
+     </SourceCode>
+    </Operation>{{/enumVars}}
+    </Service>{{/allowableValues}}
+</DataType>
