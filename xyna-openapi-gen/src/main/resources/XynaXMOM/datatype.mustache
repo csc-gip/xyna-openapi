@@ -90,7 +90,7 @@
             {{#isDate}}new OpenAPIDateType("{{classname}}.{{name}}", (String)get("{{name}}")){{/isDate}}{{/isNumeric}}
             )
             {{#isNumeric}}{{#exclusiveMinimum}}.setExcludeMin(){{/exclusiveMinimum}}{{#exclusiveMaximum}}.setExcludeMax(){{/exclusiveMaximum}}{{/isNumeric}}{{^isNumeric}}
-            {{#isString}}{{#dataFormat}}.setFormat("{{dataFormat}}"){{/dataFormat}}{{/isString}}
+            {{#isString}}{{#dataFormat}}.setFormat("{{dataFormat}}"){{/dataFormat}}{{/isString}}{{/isNumeric}}
             {{#requiered}}.setRequiered(){{/requiered}}{{^requiered}}.setNullable(){{/requiered}}
               ;
           if (!primObj_{{-index}}.isValid()) results.add(new ValidationResult(false, primObj_{{-index}}.toString());
