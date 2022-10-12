@@ -8,6 +8,16 @@ public class OpenAPINumberType<N extends Number> extends OpenAPIPrimitiveType<N>
     private N min;
     private N max;
 
+    public OpenAPINumberType<N> setMin(N min) {
+        this.min = min;
+        return this;
+    }
+
+    public OpenAPINumberType<N> setMax(N max) {
+        this.max = max;
+        return this;
+    }
+
     public OpenAPINumberType(final String name, final N value) {
         super(name, value);
     }
@@ -47,6 +57,9 @@ public class OpenAPINumberType<N extends Number> extends OpenAPIPrimitiveType<N>
     private boolean checkMultipleOf() {
         boolean valid = true;
         if (multipleOf != null) {
+            if (multipleOf.intValue() == 0) {
+                return getValue().doubleValue() == 0;
+            }
             valid = !isNull();
             if (multipleOf instanceof Long) {
                 valid = valid && (getValue().longValue() % multipleOf.longValue() == 0L);
@@ -66,16 +79,16 @@ public class OpenAPINumberType<N extends Number> extends OpenAPIPrimitiveType<N>
         boolean valid = true;
         if (min != null) {
             valid = !isNull();
-            if (multipleOf instanceof Long) {
+            if (min instanceof Long) {
                 valid = valid && (((min.longValue() <= getValue().longValue()) && !excludeMin)
                         || (min.longValue() < getValue().longValue()));
-            } else if (multipleOf instanceof Integer) {
+            } else if (min instanceof Integer) {
                 valid = valid && (((min.intValue() <= getValue().intValue()) && !excludeMin)
                         || (min.intValue() < getValue().intValue()));
-            } else if (multipleOf instanceof Double) {
+            } else if (min instanceof Double) {
                 valid = valid && (((min.doubleValue() <= getValue().doubleValue()) && !excludeMin)
                         || (min.doubleValue() < getValue().doubleValue()));
-            } else if (multipleOf instanceof Float) {
+            } else if (min instanceof Float) {
                 valid = valid && (((min.floatValue() <= getValue().floatValue()) && !excludeMin)
                         || (min.floatValue() < getValue().floatValue()));
             }
@@ -88,16 +101,16 @@ public class OpenAPINumberType<N extends Number> extends OpenAPIPrimitiveType<N>
         boolean valid = true;
         if (max != null) {
             valid = !isNull();
-            if (multipleOf instanceof Long) {
+            if (max instanceof Long) {
                 valid = valid && (((max.longValue() >= getValue().longValue()) && !excludeMax)
                         || (max.longValue() > getValue().longValue()));
-            } else if (multipleOf instanceof Integer) {
+            } else if (max instanceof Integer) {
                 valid = valid && (((max.intValue() >= getValue().intValue()) && !excludeMax)
                         || (max.intValue() > getValue().intValue()));
-            } else if (multipleOf instanceof Double) {
+            } else if (max instanceof Double) {
                 valid = valid && (((max.doubleValue() >= getValue().doubleValue()) && !excludeMax)
                         || (max.doubleValue() > getValue().doubleValue()));
-            } else if (multipleOf instanceof Float) {
+            } else if (max instanceof Float) {
                 valid = valid && (((max.floatValue() >= getValue().floatValue()) && !excludeMax)
                         || (max.floatValue() > getValue().floatValue()));
             }
