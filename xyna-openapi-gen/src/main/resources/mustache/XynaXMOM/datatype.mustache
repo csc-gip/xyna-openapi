@@ -70,7 +70,7 @@
       </Output>
       <SourceCode>
         <CodeSnippet Type="Java">
-        var results = new ArrayList<ValidationResult>
+        var results = new ArrayList&lt;ValidationResult&gt;
         
         boolean valid = isNullable() || (isRequiered() &amp;&amp; !isNull());
         if (!valid) results.add(new ValidationResult(valid, this.getClass().getName() + " not nullable or requiered but null."));
@@ -80,11 +80,11 @@
           {{#isPrimitiveType}}
         try {
           var primObj_{{-index}} = (
-            {{#isNumeric}}{{#isInteger}}new OpenAPINumberType<Integer>("{{classname}}.{{name}}", (Integer)get("{{name}}")){{/isInteger}}
-            {{#isLong}}new OpenAPINumberType<Long>("{{classname}}.{{name}}", (Long)get("{{name}}")){{/isLong}}
-            {{#isDouble}}new OpenAPINumberType<Double>("{{classname}}.{{name}}", (Double)get("{{name}}")){{/isDouble}}
-            {{#isNumber}}new OpenAPINumberType<Double>("{{classname}}.{{name}}", (Double)get("{{name}}")){{/isNumber}}
-            {{#isFloat}}new OpenAPINumberType<Float>("{{classname}}.{{name}}", ((Double)get("{{name}}")).floatValue()){{/isFloat}}{{/isNumeric}}{{^isNumeric}}
+            {{#isNumeric}}{{#isInteger}}new OpenAPINumberType&lt;Integer&gt;("{{classname}}.{{name}}", (Integer)get("{{name}}")){{/isInteger}}
+            {{#isLong}}new OpenAPINumberType&lt;Long&gt;("{{classname}}.{{name}}", (Long)get("{{name}}")){{/isLong}}
+            {{#isDouble}}new OpenAPINumberType&lt;Double&gt;("{{classname}}.{{name}}", (Double)get("{{name}}")){{/isDouble}}
+            {{#isNumber}}new OpenAPINumberType&lt;Double&gt;("{{classname}}.{{name}}", (Double)get("{{name}}")){{/isNumber}}
+            {{#isFloat}}new OpenAPINumberType&lt;Float&gt;("{{classname}}.{{name}}", ((Double)get("{{name}}")).floatValue()){{/isFloat}}{{/isNumeric}}{{^isNumeric}}
             {{#isString}}new OpenAPIStringType("{{classname}}.{{name}}", (String)get("{{name}}")){{/isString}}
             {{#isDateTime}}new OpenAPIDateTimeType("{{classname}}.{{name}}", (String)get("{{name}}")){{/isDateTime}}
             {{#isDate}}new OpenAPIDateType("{{classname}}.{{name}}", (String)get("{{name}}")){{/isDate}}{{/isNumeric}}

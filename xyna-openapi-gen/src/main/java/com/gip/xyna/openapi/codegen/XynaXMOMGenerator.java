@@ -8,6 +8,8 @@ import io.swagger.codegen.v3.generators.DefaultCodegenConfig;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.*;
@@ -451,17 +453,24 @@ public class XynaXMOMGenerator extends DefaultCodegenConfig {
    *         `returnType` for api
    *         templates
    */
-  /*
-   * @Override
-   * public String getTypeDeclaration(Property p) {
-   * if (p instanceof MapProperty) {
-   * MapProperty mp = (MapProperty) p;
-   * Property inner = mp.getAdditionalProperties();
-   * return getSwaggerType(p) + "[String, " + getTypeDeclaration(inner) + "]";
-   * }
-   * return super.getTypeDeclaration(p);
-   * }
-   */
+
+  @Override
+  public String getTypeDeclaration(Schema p) {
+    if (p instanceof MapSchema) {
+      MapSchema mp = (MapSchema) p;
+      Object inner = mp.getAdditionalProperties();
+      if (inner instanceof Schema) {
+        return getSchemaType(p) + "[String, " + getTypeDeclaration((Schema) inner) + "]";
+      }
+    }
+    if (p instanceof ArraySchema) {
+      ArraySchema mp = (ArraySchema) p;
+      Schema inner = mp.getItems();
+      return getSchemaType(inner);
+    }
+    return super.getTypeDeclaration(p);
+  }
+
   /**
    * Optional - swagger type conversion. This is used to map swagger types in a
    * `Property` into
