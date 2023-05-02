@@ -1,17 +1,23 @@
 package com.gip.xyna.openapi.codegen;
 
-import io.swagger.codegen.*;
-import io.swagger.models.Model;
-import io.swagger.models.Swagger;
-import io.swagger.models.Info;
-import io.swagger.models.License;
-import io.swagger.models.properties.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.swagger.codegen.v3.*;
+import io.swagger.codegen.v3.generators.DefaultCodegenConfig;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.*;
 import java.util.Map.Entry;
 import java.io.File;
 
-public class XynaXMOMGenerator extends DefaultCodegen implements CodegenConfig {
+// https://github.com/swagger-api/swagger-codegen-generators/blob/master/src/main/java/io/swagger/codegen/v3/generators/DefaultCodegenConfig.java
+public class XynaXMOMGenerator extends DefaultCodegenConfig {
+
+  protected static final Logger LOGGER = LoggerFactory.getLogger(DefaultCodegenConfig.class);
 
   // source folder where to write the files
   protected String sourceFolder = "XMOM";
@@ -144,7 +150,8 @@ public class XynaXMOMGenerator extends DefaultCodegen implements CodegenConfig {
    * super.toEnumVarName(value, datatype); }
    */
   /**
-   * Configures a friendly name for the generator. This will be used by the generator to select the
+   * Configures a friendly name for the generator. This will be used by the
+   * generator to select the
    * library with the -l flag.
    * 
    * @return the friendly name for the generator
@@ -154,7 +161,8 @@ public class XynaXMOMGenerator extends DefaultCodegen implements CodegenConfig {
   }
 
   /**
-   * Returns human-friendly help for the generator. Provide the consumer with help tips, parameters
+   * Returns human-friendly help for the generator. Provide the consumer with help
+   * tips, parameters
    * here
    * 
    * @return A string value for the help message
@@ -170,25 +178,31 @@ public class XynaXMOMGenerator extends DefaultCodegen implements CodegenConfig {
     outputFolder = "generated-code/XynaXMOM";
 
     /**
-     * Models. You can write model files using the modelTemplateFiles map. if you want to create one
-     * template for file, you can do so here. for multiple files for model, just put another entry
+     * Models. You can write model files using the modelTemplateFiles map. if you
+     * want to create one
+     * template for file, you can do so here. for multiple files for model, just put
+     * another entry
      * in the `modelTemplateFiles` with a different extension
      */
     modelTemplateFiles.put("model.mustache", // the template to use
         ".xml"); // the extension for each file to write
 
     /**
-     * Api classes. You can write classes for each Api file with the apiTemplateFiles map. as with
-     * models, add multiple entries with different extensions for multiple files per class
+     * Api classes. You can write classes for each Api file with the
+     * apiTemplateFiles map. as with
+     * models, add multiple entries with different extensions for multiple files per
+     * class
      *//*
-        * apiTemplateFiles.put( "api.mustache", // the template to use ".sample"); // the extension
+        * apiTemplateFiles.put( "api.mustache", // the template to use ".sample"); //
+        * the extension
         * for each file to write
         */
     /**
-     * Template Location. This is the location which templates will be read from. The generator will
+     * Template Location. This is the location which templates will be read from.
+     * The generator will
      * use the resource stream to attempt to read the templates.
      */
-    templateDir = "XynaXMOM";
+    templateDir = "mustache/XynaXMOM";
 
     /**
      * Api Package. Optional, if needed, this can be used in templates
@@ -211,16 +225,20 @@ public class XynaXMOMGenerator extends DefaultCodegen implements CodegenConfig {
     reservedWords = new HashSet<String>();
 
     /**
-     * Additional Properties. These values can be passed to the templates and are available in
+     * Additional Properties. These values can be passed to the templates and are
+     * available in
      * models, apis, and supporting files
      */
     additionalProperties.put("apiVersion", apiVersion);
     additionalProperties.put(XYNA_FACTORY_VERSION, xynaFactoryVersion);
     additionalProperties.put(XYNA_OPENAPI_VERSION, xynaOpenAPIVersion);
+    additionalProperties.put(CodegenConstants.TEMPLATE_ENGINE, CodegenConstants.MUSTACHE_TEMPLATE_ENGINE);
 
     /**
-     * Supporting Files. You can write single files for the generator with the entire object tree
-     * available. If the input file has a suffix of `.mustache it will be processed by the template
+     * Supporting Files. You can write single files for the generator with the
+     * entire object tree
+     * available. If the input file has a suffix of `.mustache it will be processed
+     * by the template
      * engine. Otherwise, it will be copied
      */
 
@@ -230,7 +248,8 @@ public class XynaXMOMGenerator extends DefaultCodegen implements CodegenConfig {
     );
 
     /**
-     * Language Specific Primitives. These types will not trigger imports by the client generator
+     * Language Specific Primitives. These types will not trigger imports by the
+     * client generator
      */
     languageSpecificPrimitives = new HashSet<String>(Arrays.asList("String", "boolean", "Boolean",
         "Double", "Integer", "Long", "Float", "OpenAPIBaseType"));
@@ -281,7 +300,12 @@ public class XynaXMOMGenerator extends DefaultCodegen implements CodegenConfig {
 
   @Override
   public void processOpts() {
+
+    LOGGER.debug("processOpts1", additionalProperties.toString());
+
     super.processOpts();
+
+    LOGGER.debug("processOpts2", additionalProperties.toString());
 
     if (additionalProperties.containsKey(PROJECT_NAME)) {
       setProjectName(((String) additionalProperties.get(PROJECT_NAME)));
@@ -332,11 +356,11 @@ public class XynaXMOMGenerator extends DefaultCodegen implements CodegenConfig {
   }
 
   @Override
-  public void preprocessSwagger(Swagger swagger) {
-    super.preprocessSwagger(swagger);
+  public void preprocessOpenAPI(OpenAPI openAPI) {
+    super.preprocessOpenAPI(openAPI);
 
-    if (swagger.getInfo() != null) {
-      Info info = swagger.getInfo();
+    if (openAPI.getInfo() != null) {
+      Info info = openAPI.getInfo();
       if ((projectName == null || projectName.length() <= 0) && info.getTitle() != null) {
         // when projectName is not specified, generate it from info.title
         projectName = sanitizeName(underscore(info.getTitle()));
@@ -386,7 +410,8 @@ public class XynaXMOMGenerator extends DefaultCodegen implements CodegenConfig {
   }
 
   /**
-   * Escapes a reserved word as defined in the `reservedWords` array. Handle escaping those terms
+   * Escapes a reserved word as defined in the `reservedWords` array. Handle
+   * escaping those terms
    * here. This logic is only called if a variable matches the reserved words
    * 
    * @return the escaped term
@@ -397,7 +422,8 @@ public class XynaXMOMGenerator extends DefaultCodegen implements CodegenConfig {
   }
 
   /**
-   * Location to write model files. You can use the modelPackage() as defined when the class is
+   * Location to write model files. You can use the modelPackage() as defined when
+   * the class is
    * instantiated
    */
   public String modelFileFolder() {
@@ -406,7 +432,8 @@ public class XynaXMOMGenerator extends DefaultCodegen implements CodegenConfig {
   }
 
   /**
-   * Location to write api files. You can use the apiPackage() as defined when the class is
+   * Location to write api files. You can use the apiPackage() as defined when the
+   * class is
    * instantiated
    */
   @Override
@@ -416,33 +443,39 @@ public class XynaXMOMGenerator extends DefaultCodegen implements CodegenConfig {
   }
 
   /**
-   * Optional - type declaration. This is a String which is used by the templates to instantiate
+   * Optional - type declaration. This is a String which is used by the templates
+   * to instantiate
    * your types. There is typically special handling for different property types
    *
-   * @return a string value used as the `dataType` field for model templates, `returnType` for api
+   * @return a string value used as the `dataType` field for model templates,
+   *         `returnType` for api
    *         templates
    */
-  @Override
-  public String getTypeDeclaration(Property p) {
-    if (p instanceof MapProperty) {
-      MapProperty mp = (MapProperty) p;
-      Property inner = mp.getAdditionalProperties();
-      return getSwaggerType(p) + "[String, " + getTypeDeclaration(inner) + "]";
-    }
-    return super.getTypeDeclaration(p);
-  }
-
+  /*
+   * @Override
+   * public String getTypeDeclaration(Property p) {
+   * if (p instanceof MapProperty) {
+   * MapProperty mp = (MapProperty) p;
+   * Property inner = mp.getAdditionalProperties();
+   * return getSwaggerType(p) + "[String, " + getTypeDeclaration(inner) + "]";
+   * }
+   * return super.getTypeDeclaration(p);
+   * }
+   */
   /**
-   * Optional - swagger type conversion. This is used to map swagger types in a `Property` into
-   * either language specific types via `typeMapping` or into complex models if there is not a
+   * Optional - swagger type conversion. This is used to map swagger types in a
+   * `Property` into
+   * either language specific types via `typeMapping` or into complex models if
+   * there is not a
    * mapping.
    *
    * @return a string value of the type or complex model for this property
    * @see io.swagger.models.properties.Property
    */
+
   @Override
-  public String getSwaggerType(Property p) {
-    String swaggerType = super.getSwaggerType(p);
+  public String getSchemaType(Schema p) {
+    String swaggerType = super.getSchemaType(p);
     String type = null;
     if (typeMapping.containsKey(swaggerType)) {
       type = typeMapping.get(swaggerType);
@@ -484,7 +517,7 @@ public class XynaXMOMGenerator extends DefaultCodegen implements CodegenConfig {
 
   private void replaceComplexTypeForEnumByString(CodegenModel codegenModel,
       Map<String, CodegenModel> allModels) {
-    if (codegenModel.isEnum)
+    if (codegenModel.getIsEnum().booleanValue())
       return;
 
     List<CodegenProperty> vars = codegenModel.vars;
@@ -493,27 +526,29 @@ public class XynaXMOMGenerator extends DefaultCodegen implements CodegenConfig {
       vars.addAll(codegenModel.allVars);
     }
     for (CodegenProperty p : vars) {
-      if (p.isPrimitiveType)
+      if (p.getIsPrimitiveType().booleanValue())
         continue;
 
-      final var targetModel = allModels.get(toModelName(p.complexType));
-      if (targetModel != null && targetModel.isEnum) {
-        p.description = p.description + " " + "Converted to String from " + p.complexType + " Enum";
-        p.unescapedDescription =
-            p.unescapedDescription + " " + "Converted to String from " + p.complexType + " Enum";
-        p.baseType = p.baseType.replace(p.complexType, "String");
-        p.datatype = p.datatype.replace(p.complexType, "String");
-        p.datatypeWithEnum = p.datatypeWithEnum.replace(p.complexType, "String");
-        p.complexType = null;
-        p.isString = p.isNotContainer;
-        p.isPrimitiveType = p.isNotContainer;
+      final var targetModel = allModels.get(toModelName(p.getComplexType()));
+      if (targetModel != null && targetModel.getIsEnum().booleanValue()) {
+        p.setDescription(p.getDescription() + " " + "Converted to String from " + p.getComplexType() + " Enum");
+        p.setUnescapedDescription(
+            p.getUnescapedDescription() + " " + "Converted to String from " + p.getComplexType() + " Enum");
+        p.setBaseType(p.getBaseType().replace(p.getComplexType(), "String"));
+        p.setDatatype(p.getDatatype().replace(p.getComplexType(), "String"));
+        p.setDatatypeWithEnum(p.getDatatypeWithEnum().replace(p.getComplexType(), "String"));
+        p.setComplexType(null);
+        /*
+         * p.isString = p.isNotContainer;
+         * p.isPrimitiveType = p.isNotContainer;
+         */
       }
     }
 
   }
 
   @Override
-  public CodegenModel fromModel(String arg0, Model arg1, Map<String, Model> arg2) {
+  public CodegenModel fromModel(String arg0, Schema arg1, Map<String, Schema> arg2) {
     CodegenModel codegenModel = super.fromModel(arg0, arg1, arg2);
 
     // Mark all OpenAPI Objects
@@ -522,6 +557,21 @@ public class XynaXMOMGenerator extends DefaultCodegen implements CodegenConfig {
     }
 
     return codegenModel;
+  }
+
+  @Override
+  public String getDefaultTemplateDir() {
+    return templateDir;
+  }
+
+  @Override
+  public String getTemplateDir() {
+    return templateDir;
+  }
+
+  @Override
+  public String customTemplateDir() {
+    return templateDir;
   }
 
 }

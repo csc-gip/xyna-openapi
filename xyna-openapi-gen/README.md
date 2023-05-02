@@ -1,7 +1,15 @@
 # Swagger Codegen for the XynaXMOM library
 
+v2
 https://github.com/swagger-api/swagger-codegen-generators/wiki/Adding-a-new-generator-for-a-language-or-framework.
 https://github.com/swagger-api/swagger-codegen-generators/pull/451/commits/2f53b03cd61003d4b5d6505cd8cc5da855a638d6#diff-16375f2279f5f42ab8817fb15f8827f2cda3711ff3cffdbfcf6d001ae31049bf
+
+v3
+https://github.com/swagger-api/swagger-codegen/blob/3.0.0/standalone-gen-dev/standalone-generator-development.md
+
+
+Und es gibt einen Fork: https://openapi-generator.tech/docs/fork-qna/
+Der kann aber keinen Standalone Generator, so wie es aussieht.
 
 ## Overview
 This is a boiler-plate project to generate your own client library with Swagger.  Its goal is
@@ -26,10 +34,10 @@ At this point, you've likely generated a client setup.  It will include somethin
 |---- java
 |----- com.gip.xyna.openapi.codegen.XynaxXMOMenerator.java // generator file
 |---- resources
-|----- XynaXMOM // template files
+|----- mustache/XynaXMOM // template files
 |----- META-INF
 |------ services
-|------- io.swagger.codegen.CodegenConfig
+|------- io.swagger.codegen.v3.CodegenConfig
 ```
 
 You _will_ need to make changes in at least the following:
@@ -38,7 +46,7 @@ You _will_ need to make changes in at least the following:
 
 Templates in this folder:
 
-`src/main/resources/XynaXMOM`
+`src/main/resources/mustache/XynaXMOM`
 
 Once modified, you can run this:
 
@@ -49,11 +57,12 @@ mvn package
 In your generator project.  A single jar file will be produced in `target`.  You can now use that with codegen:
 
 ```
-java -cp /path/to/swagger-codegen-cli.jar:/path/to/your.jar io.swagger.codegen.Codegen -l XynaXMOM -i /path/to/swagger.yaml -o ./test
+java -cp /path/to/swagger-codegen-cli.jar:/path/to/your.jar io.swagger.codegen.v3.cli.SwaggerCodegen generate -l XynaXMOM --template-engine mustache -i /path/to/swagger.yaml -o ./test
 ```
 
 ```
-java -DdebugModels -cp "target/XynaXMOM-openapi-codegen-1.0.0.jar;swagger-codegen-cli-2.4.28.jar" io.swagger.codegen.SwaggerCodegen generate -l XynaXMOM  -i http://petstore.swagger.io/v2/swagger.json   -o xmom > out.txt
+wget https://github.com/swagger-api/swagger-codegen/raw/3.0.0/modules/swagger-codegen/src/test/resources/3_0_0/petstore.json 
+java -DdebugModels -cp "target/XynaXMOM-openapi-codegen-1.0.0.jar;swagger-codegen-cli-3.0.21.jar" io.swagger.codegen.v3.cli.SwaggerCodegen generate -l XynaXMOM --template-engine mustache -i petstore.json -o xmom > out.txt
 ```
 
 Now your templates are available to the client generator and you can write output values
@@ -74,7 +83,7 @@ the object you have available during client generation:
 # -DdebugOperations prints operations passed to the template engine
 # -DdebugSupportingFiles prints additional data passed to the template engine
 
-java -DdebugOperations -cp /path/to/swagger-codegen-cli.jar:/path/to/your.jar io.swagger.codegen.Codegen -l XynaXMOM -i /path/to/swagger.yaml -o ./test
+java -DdebugOperations -cp /path/to/swagger-codegen-cli.jar:/path/to/your.jar io.swagger.codegen.v3.cli.SwaggerCodegen generate -l XynaXMOM --template-engine mustache -i /path/to/swagger.yaml -o ./test
 ```
 
 Will, for example, output the debug info for operations.  You can use this info
