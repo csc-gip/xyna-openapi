@@ -18,50 +18,11 @@
    >
     <Meta>
       {{#isPrimitiveType}}<Type>{{^isFloat}}{{datatype}}{{/isFloat}}{{#isFloat}}Double{{/isFloat}}</Type>{{/isPrimitiveType}}
-      {{#description}}<Documentation>{{description}}{{#isFloat}} Float but handled as Double{{/isFloat}}</Documentation>{{/description}}
+      <Documentation>{{#description}}{{description}} {{/description}}{{#isFloat}}Float but handled as Double, {{/isFloat}}requiered: {{required}}, nullable: {{nullable}}</Documentation>
     </Meta>
   </Data>
 {{/vars}}
   <Service Label="{{classname}}" TypeName="{{classname}}">
-    <Operation Label="is nullable" Name="isNullable" IsStatic="false">
-      <Input/>
-      <Output>
-        <Data Label="is nullable" VariableName="is_nullable">
-          <Meta>
-            <Type>boolean</Type>
-          </Meta>
-        </Data>
-      </Output>
-      <SourceCode>
-        <CodeSnippet Type="Java">return true;</CodeSnippet>
-     </SourceCode>
-    </Operation>
-    <Operation Label="is null" Name="isNull" IsStatic="false">
-      <Input/>
-      <Output>
-        <Data Label="is null" VariableName="is_null">
-          <Meta>
-            <Type>boolean</Type>
-          </Meta>
-        </Data>
-      </Output>
-      <SourceCode>
-        <CodeSnippet Type="Java">return false;</CodeSnippet>
-     </SourceCode>
-    </Operation>
-    <Operation Label="is requiered" Name="isRequiered" IsStatic="false">
-      <Input/>
-      <Output>
-        <Data Label="is requiered" VariableName="is_requiered">
-          <Meta>
-            <Type>boolean</Type>
-          </Meta>
-        </Data>
-      </Output>
-      <SourceCode>
-        <CodeSnippet Type="Java">return false;</CodeSnippet>
-     </SourceCode>
-    </Operation>
     <Operation Label="validate" Name="validate" IsStatic="false">
       <Input>
       </Input>
@@ -70,10 +31,7 @@
       </Output>
       <SourceCode>
         <CodeSnippet Type="Java">
-        var results = new ArrayList&lt;ValidationResult&gt;
-        
-        boolean valid = isNullable() || (isRequiered() &amp;&amp; !isNull());
-        if (!valid) results.add(new ValidationResult(valid, this.getClass().getName() + " not nullable or requiered but null."));
+        var results = new ValidationResult(true, ArrayList&lt;String&gt;());
         {{#vars}}
 
         // validate {{classname}}.{{name}} of type {{datatype}} with baseType {{baseType}}
@@ -91,39 +49,55 @@
             )
             {{#isNumeric}}{{#exclusiveMinimum}}.setExcludeMin(){{/exclusiveMinimum}}{{#exclusiveMaximum}}.setExcludeMax(){{/exclusiveMaximum}}{{/isNumeric}}{{^isNumeric}}
             {{#isString}}{{#dataFormat}}.setFormat("{{dataFormat}}"){{/dataFormat}}{{/isString}}{{/isNumeric}}
-            {{#requiered}}.setRequiered(){{/requiered}}{{^requiered}}.setNullable(){{/requiered}}
+            {{#required}}.setRequired(){{/required}}{{#nullable}}.setNullable(){{/nullable}}
               ;
-          if (!primObj_{{-index}}.isValid()) results.add(new ValidationResult(false, primObj_{{-index}}.toString());
-        }
-        catch (Excpeption e) {
-          results.add(new ValidationResult(false, "error validating {{classname}}.{{name}}" + e.toString());
-        }
-          {{/isPrimitiveType}}{{^isPrimitiveType}}
-        try {
-          var cplxObj_{{-index}} = (({{complexType}})this.get("{{name}}"));
-          if (cplxObj_{{-index}} != null) {
-            var cplxValidationResult_{{-index}} = cplxObj_{{-index}}.validate();
-            if (!cplxValidationResult_{{-index}}.getIsValid()) results.add(cplxValidationResult_{{-index}});
-          } else if ({{#requiered}}true{{/requiered}}{{^requiered}}false{{/requiered}} &amp;&amp; true) {
-            results.add(new ValidationResult(false, "{{classname}}.{{name}} of type {{complexType}} is null but requiered");
+          if (!primObj_{{-index}}.isValid()) {
+             results.setIsValid(false);
+             results.getValidationResult().add(primObj_{{-index}}.toString());
           }
         }
         catch (Excpeption e) {
-          results.add(new ValidationResult(false, "error validating {{classname}}.{{name}} of type {{complexType}}" + e.toString());
+          results.setIsValid(false);
+          results.getValidationResult().add("error validating {{classname}}.{{name}}" + e.toString());
+        }
+          {{/isPrimitiveType}}{{^isPrimitiveType}}
+        try {
+          var cplxObj_{{-index}} = this.get("{{name}}");
+          if (cplxObj_{{-index}} != null) {
+          {{^isListContainer}}
+            var cplxValidationResult_{{-index}} = (({{complexType}})cplxObj_{{-index}}).validate();
+            if (!cplxValidationResult_{{-index}}.getIsValid()) {
+                results.setIsValid(false);
+                results.getValidationResult().addAll(cplxValidationResult_{{-index}}.getValidationResult());
+            }
+          {{/isListContainer}}
+          {{#isListContainer}}
+            var cplxObjList_{{-index}} = (List&lt;{{complexType}}&gt;)cplxObj_{{-index}};
+            for (var l : cplxObjList_{{-index}}) {
+                var lValidationResult = l.validate();
+                if (!lValidationResult.getIsValid()) {
+                    results.setIsValid(false);
+                    results.getValidationResult().addAll(lValidationResult.getValidationResult());
+                }
+            }
+          {{/isListContainer}}
+          } else if ({{#requiered}}true{{/requiered}}{{^requiered}}false{{/requiered}} &amp;&amp; true) {
+            results.setIsValid(false);
+            results.getValidationResult().add("{{classname}}.{{name}} of type {{complexType}} is null but requiered");
+          }
+        }
+        catch (Excpeption e) {
+          results.setIsValid(false);
+          results.getValidationResult().add("error validating {{classname}}.{{name}}" + e.toString());
         }
           {{/isPrimitiveType}}
         {{/vars}}
 
-         if (results.size() &lt;= 0) return new ValidationResult(true, "OK");
-
-         StringBuffer sb = new StringBuffer();
-         results.forEach((r) -&gt; sb.append(r.getValidationResult()).append("\n"));
-
-         return new ValidationResult(false, sb.toString());
+         return results;
         </CodeSnippet>
       </SourceCode>
     </Operation>
-    <Operation Label="set defaults" Name="setDefaults" IsStatic="false" IsAbstract="true">
+    <Operation Label="set defaults" Name="setDefaults" IsStatic="false">
       <Input>
       </Input>
       <Output>

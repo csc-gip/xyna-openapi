@@ -3,7 +3,7 @@ package com.gip.xyna.openapi;
 public abstract class OpenAPIBaseType {
     private final String name;
     private boolean isNullable;
-    private boolean isRequiered;
+    private boolean isRequired;
 
     public OpenAPIBaseType(final String name) {
         this.name = name;
@@ -22,8 +22,8 @@ public abstract class OpenAPIBaseType {
         return this;
     }
 
-    public OpenAPIBaseType setRequiered() {
-        isRequiered = true;
+    public OpenAPIBaseType setRequired() {
+        isRequired = true;
         return this;
     }
 
@@ -31,13 +31,13 @@ public abstract class OpenAPIBaseType {
         return isNullable;
     }
 
-    public boolean isRequiered() {
-        return isRequiered;
+    public boolean isRequired() {
+        return isRequired;
     }
 
     public boolean isValid() {
         return (!isNullable() && !isNull() || isNullable())
-                && (isRequiered() && !isNull() || !isRequiered());
+                && (isRequired() && !isNull() || !isRequired());
     }
 
     @Override
@@ -48,7 +48,7 @@ public abstract class OpenAPIBaseType {
         sb.append("name: ").append(name).append("\n");
         sb.append("isNull: ").append(String.valueOf(isNull())).append("\n");
         sb.append("isNullable: ").append(String.valueOf(isNullable())).append("\n");
-        sb.append("isRequiered: ").append(String.valueOf(isRequiered())).append("\n");
+        sb.append("isRequired: ").append(String.valueOf(isRequired())).append("\n");
 
         return sb.toString();
     }
