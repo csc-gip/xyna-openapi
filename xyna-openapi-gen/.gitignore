@@ -1,2 +1,5 @@
-/target
-/.vscode
+target
+.vscode
+xmom
+out.txt
+petstore.json

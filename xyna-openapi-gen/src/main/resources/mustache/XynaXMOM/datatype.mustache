@@ -35,7 +35,7 @@
         {{#vars}}
 
         // validate {{classname}}.{{name}} of type {{datatype}} with baseType {{baseType}}
-          {{#isPrimitiveType}}
+          {{#isPrimitiveType}}{{#isNotContainer}}
         try {
           var primObj_{{-index}} = (
             {{#isNumeric}}{{#isInteger}}new OpenAPINumberType&lt;Integer&gt;("{{classname}}.{{name}}", (Integer)get("{{name}}")){{/isInteger}}
@@ -60,7 +60,40 @@
           results.setIsValid(false);
           results.getValidationResult().add("error validating {{classname}}.{{name}}" + e.toString());
         }
-          {{/isPrimitiveType}}{{^isPrimitiveType}}
+          {{/isNotContainer}}{{#isListContainer}}
+        try {
+          var primObjList_{{-index}} = (List&lt;{{datatype}}&gt;)this.get("{{name}}");
+          if (primObjList_{{-index}} != null) {
+            for (var l : primObjList_{{-index}}) {
+                var item = (
+               {{#items.isNumeric}}{{#items.isInteger}}new OpenAPINumberType&lt;Integer&gt;("{{classname}}.{{name}}", l){{/items.isInteger}}
+               {{#items.isLong}}new OpenAPINumberType&lt;Long&gt;("{{classname}}.{{name}}", l){{/items.isLong}}
+               {{#items.isDouble}}new OpenAPINumberType&lt;Double&gt;("{{classname}}.{{name}}", l){{/items.isDouble}}
+               {{#items.isNumber}}new OpenAPINumberType&lt;Double&gt;("{{classname}}.{{name}}", l){{/items.isNumber}}
+               {{#items.isFloat}}new OpenAPINumberType&lt;Float&gt;("{{classname}}.{{name}}", l.floatValue()){{/items.isFloat}}{{/items.isNumeric}}{{^items.isNumeric}}
+               {{#items.isString}}new OpenAPIStringType("{{classname}}.{{name}}", l){{/items.isString}}
+               {{#items.isDateTime}}new OpenAPIDateTimeType("{{classname}}.{{name}}", l){{/items.isDateTime}}
+               {{#items.isDate}}new OpenAPIDateType("{{classname}}.{{name}}", l){{/items.isDate}}{{/items.isNumeric}}
+                 )
+               {{#items.isNumeric}}{{#exclusiveMinimum}}.setExcludeMin(){{/exclusiveMinimum}}{{#exclusiveMaximum}}.setExcludeMax(){{/exclusiveMaximum}}{{/items.isNumeric}}{{^items.isNumeric}}
+               {{#items.isString}}{{#dataFormat}}.setFormat("{{dataFormat}}"){{/dataFormat}}{{/items.isString}}{{/items.isNumeric}}
+               {{#items.required}}.setRequired(){{/items.required}}{{#items.nullable}}.setNullable(){{/items.nullable}}
+                 ;
+                if (!item.isValid()) {
+                   results.setIsValid(false);
+                   results.getValidationResult().add(item.toString());
+                }
+             }
+          } else if ({{#required}}true{{/required}}{{^required}}false{{/required}} &amp;&amp; true) {
+            results.setIsValid(false);
+            results.getValidationResult().add("{{classname}}.{{name}} List of type {{dataype}} is null but requiered");
+          }
+        }
+        catch (Excpeption e) {
+          results.setIsValid(false);
+          results.getValidationResult().add("error validating {{classname}}.{{name}}" + e.toString());
+        }
+          {{/isListContainer}}{{/isPrimitiveType}}{{^isPrimitiveType}}
         try {
           var cplxObj_{{-index}} = this.get("{{name}}");
           if (cplxObj_{{-index}} != null) {
@@ -81,7 +114,7 @@
                 }
             }
           {{/isListContainer}}
-          } else if ({{#requiered}}true{{/requiered}}{{^requiered}}false{{/requiered}} &amp;&amp; true) {
+          } else if ({{#required}}true{{/required}}{{^required}}false{{/required}} &amp;&amp; true) {
             results.setIsValid(false);
             results.getValidationResult().add("{{classname}}.{{name}} of type {{complexType}} is null but requiered");
           }
