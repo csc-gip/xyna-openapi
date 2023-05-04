@@ -18,7 +18,10 @@
    >
     <Meta>
       {{#isPrimitiveType}}<Type>{{^isFloat}}{{datatype}}{{/isFloat}}{{#isFloat}}Double{{/isFloat}}</Type>{{/isPrimitiveType}}
-      <Documentation>{{#description}}{{description}} {{/description}}{{#isFloat}}Float but handled as Double, {{/isFloat}}requiered: {{required}}, nullable: {{nullable}}</Documentation>
+      <Documentation>{{#description}}{{description}}
+{{/description}}{{#isFloat}}Float but handled as Double,
+{{/isFloat}}{{#isEnum}}Enum with values: {{_enum}}
+{{/isEnum}}requiered: {{required}}, nullable: {{nullable}}</Documentation>
     </Meta>
   </Data>
 {{/vars}}
